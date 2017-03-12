@@ -1,0 +1,2 @@
+# mage.sovereign-mailstack
+
