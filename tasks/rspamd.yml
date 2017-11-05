@@ -1,5 +1,5 @@
 ---
-# Installs and configures the Rspamd spam filtering system.
+# Installs and configures the Rspamd spam/virus filtering system.
 
 - name: Ensure repository key for Rspamd is in place
   apt_key: url=https://rspamd.com/apt-stable/gpg.key state=present
@@ -16,12 +16,27 @@
   with_items:
     - rspamd
     - rmilter
-    - redis-server
+    - redis-server   # rspamd caching
+    - memcached      # rspamd graylisting caching
+    - clamav         # rspamd antivirus
+    - clamav-daemon  # rspamd antivirus
   tags:
     - dependencies
 
 - name: Configure rmilter.common
   copy: src=etc_rmilter.conf.common dest=/etc/rmilter.conf.common
+
+- name: "Configure rspamd/local.d/antivirus.conf"
+  template: src="etc_rspamd_local.d_antivirus.conf.j2" dest="/etc/rspamd/local.d/antivirus.conf"
+
+- name: "Configure rspamd/local.d/milter_headers.conf"
+  template: src="etc_rspamd_local.d_milter_headers.conf.j2" dest="/etc/rspamd/local.d/milter_headers.conf"
+
+- name: "Configure rspamd/local.d/replies.conf"
+  template: src="etc_rspamd_local.d_replies.conf.j2" dest="/etc/rspamd/local.d/replies.conf"
+
+- name: "Configure rspamd/local.d/worker-controller.inc"
+  template: src="etc_rspamd_local.d_worker-controller.inc.j2" dest="/etc/rspamd/local.d/worker-controller.inc"
 
 - name: Configure rmilter socket
   lineinfile: dest=/etc/rmilter.conf regexp=^bind_socket line="bind_socket = inet:9900@localhost;"
