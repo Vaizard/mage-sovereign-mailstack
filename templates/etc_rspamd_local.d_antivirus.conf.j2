@@ -1,0 +1,12 @@
+# The default antivirus check. Infected mails will get marked with ** SPAM ** in subject,
+# marked as read, and moved to the JUNK folder.
+
+clamav {
+  attachments_only = false;
+  symbol = "CLAM_VIRUS";
+  type = "clamav";
+  #log_clean = false;
+  servers = "127.0.0.1:3310";
+  action = "rewrite subject";
+}
+

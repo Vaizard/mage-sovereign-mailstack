@@ -27,3 +27,7 @@ mail_db_opendmarc_password: "{{ lookup('password', secret + '/' + 'mail_db_opend
 zpush_version: 2.1.1-1788
 # common_timezone is a sovereign variable
 zpush_timezone: "{{ common_timezone|default('Etc/UTC') }}"
+
+# set the redis gui password. this cannot be automated, get a pw with 
+# `openssl rand -base64 32` and hash it with `rspamadm pw`. Use the hash here.
+#mail_redis_password: ""
