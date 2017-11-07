@@ -13,8 +13,7 @@ Currently various rspam work is done. Inspiration stems from
 
 TODO:
 
-- check if we have a well configured caching dns such as unbound
-- don't mark spam as read when moving it to JUNK
+- modify etc_dovecot_sieve_before.d_no-spam.sieve so that spam gets moved to JUNK but is kept unread
 - mark infected mails differently then spam
-- drop memcached dependency for graylisting (reconfigure with redis)
-- make redis less resources hungry
+- tweak redis configuration further
+- add sieve learning

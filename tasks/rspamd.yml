@@ -15,40 +15,60 @@
   apt: pkg={{ item }} state=installed update_cache=yes
   with_items:
     - rspamd
-    - rmilter
+#    - rmilter
     - redis-server   # rspamd caching
-    - memcached      # rspamd graylisting caching
     - clamav         # rspamd antivirus
     - clamav-daemon  # rspamd antivirus
+    - unbound        # rspamd dns resolver
   tags:
     - dependencies
 
-- name: Configure rmilter.common
-  copy: src=etc_rmilter.conf.common dest=/etc/rmilter.conf.common
+#- name: Configure rmilter.common.conf and rmilter.conf
+#  copy: src="etc_{{ item }}" dest="/etc/{{ item }}"
+#  with_items:
+#     - "rmilter.conf.common"
+#     - "rmilter.conf"
 
-- name: "Configure rspamd/local.d/antivirus.conf"
-  template: src="etc_rspamd_local.d_antivirus.conf.j2" dest="/etc/rspamd/local.d/antivirus.conf"
+- name: "Configure rspamd/local.d/* files"
+  template: src="etc_rspamd_local.d_{{ item }}.j2" dest="/etc/rspamd/local.d/{{ item }}"
+  with_items:
+    - "worker-controller.inc"
+    - "worker-proxy.inc"
+    - "greylist.conf"
+    - "redis.conf"
+    - "mime_types.conf"
+    - "replies.conf"
+    - "milter_headers.conf"
+    - "antivirus.conf"
+    - "options.inc"
 
-- name: "Configure rspamd/local.d/milter_headers.conf"
-  template: src="etc_rspamd_local.d_milter_headers.conf.j2" dest="/etc/rspamd/local.d/milter_headers.conf"
+- name: "Update DNSSEC Root key and reload Unbound service"
+  shell: "unbound-anchor -a /var/lib/unbound/root.key"
 
-- name: "Configure rspamd/local.d/replies.conf"
-  template: src="etc_rspamd_local.d_replies.conf.j2" dest="/etc/rspamd/local.d/replies.conf"
+- name: "Update virus signature files"
+  shell: "freshclam"
 
-- name: "Configure rspamd/local.d/worker-controller.inc"
-  template: src="etc_rspamd_local.d_worker-controller.inc.j2" dest="/etc/rspamd/local.d/worker-controller.inc"
+- name: "Configure Redis"
+  template: src="etc_redis_redis.conf.j2" dest="/etc/redis/redis.conf"
 
-- name: Configure rmilter socket
-  lineinfile: dest=/etc/rmilter.conf regexp=^bind_socket line="bind_socket = inet:9900@localhost;"
 
-- name: Configure rmilter service
-  copy: src=lib_systemd_system_rmilter.socket dest=/lib/systemd/system/rmilter.socket
+#- name: Configure rmilter socket
+#  lineinfile: dest=/etc/rmilter.conf regexp=^bind_socket line="bind_socket = inet:9900@localhost;"
+
+#- name: Configure rmilter service
+#  copy: src=lib_systemd_system_rmilter.socket dest=/lib/systemd/system/rmilter.socket
+
+- name: Start clamav-daemon
+  service: name=clamav-daemon state=started enabled=yes
 
 - name: Start redis
-  service: name=redis-server state=started
+  service: name=redis-server state=started enabled=yes
+
+- name: Start unbound
+  service: name=unbound state=restarted enabled=yes
 
 - name: Start rspamd systemd listener
-  service: name=rspamd state=started
+  service: name=rspamd state=started enabled=yes
 
-- name: Start rmilter systemd listener
-  service: name=rmilter state=started
+#- name: Start rmilter systemd listener
+#  service: name=rmilter state=started
