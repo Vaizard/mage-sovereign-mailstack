@@ -7,6 +7,7 @@
     - dovecot-managesieved
     - dovecot-pgsql
     - dovecot-pop3d
+    - dovecot-antispam
   tags:
     - dependencies
 
@@ -57,6 +58,10 @@
 
 - name: Template 15-lda.conf
   template: src=etc_dovecot_conf.d_15-lda.conf.j2 dest=/etc/dovecot/conf.d/15-lda.conf
+  notify: restart dovecot
+
+- name: Template 20-imap.conf
+  template: src=etc_dovecot_conf.d_20-imap.conf.j2 dest=/etc/dovecot/conf.d/20-imap.conf
   notify: restart dovecot
 
 - name: Template 20-lmtp.conf

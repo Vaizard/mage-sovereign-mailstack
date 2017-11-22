@@ -45,8 +45,12 @@
 - name: "Update DNSSEC Root key and reload Unbound service"
   shell: "unbound-anchor -a /var/lib/unbound/root.key"
 
-- name: "Update virus signature files"
+- name: Stop clamav-freshclam
+  service: name=clamav-freshclam state=stopped enabled=yes
+
+- name: "Update virus signature files (can fail if freshclam daemon is already running)"
   shell: "freshclam"
+  ignore_errors: yes
 
 - name: "Configure Redis"
   template: src="etc_redis_redis.conf.j2" dest="/etc/redis/redis.conf"
@@ -61,6 +65,9 @@
 - name: Start clamav-daemon
   service: name=clamav-daemon state=started enabled=yes
 
+- name: Start clamav-freshclam
+  service: name=clamav-freshclam state=started enabled=yes
+
 - name: Start redis
   service: name=redis-server state=started enabled=yes
 
@@ -69,6 +76,9 @@
 
 - name: Start rspamd systemd listener
   service: name=rspamd state=started enabled=yes
+
+- name: Restart rspamd systemd listener
+  service: name=rspamd state=restarted enabled=yes
 
 #- name: Start rmilter systemd listener
 #  service: name=rmilter state=started
