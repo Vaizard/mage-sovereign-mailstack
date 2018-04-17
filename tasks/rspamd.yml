@@ -11,23 +11,16 @@
   tags:
     - dependencies
 
-- name: Install Rspamd, Rmilter, and Redis
+- name: Install Rspamd and Redis
   apt: pkg={{ item }} state=installed update_cache=yes
   with_items:
     - rspamd
-#    - rmilter
     - redis-server   # rspamd caching
     - clamav         # rspamd antivirus
     - clamav-daemon  # rspamd antivirus
     - unbound        # rspamd dns resolver
   tags:
     - dependencies
-
-#- name: Configure rmilter.common.conf and rmilter.conf
-#  copy: src="etc_{{ item }}" dest="/etc/{{ item }}"
-#  with_items:
-#     - "rmilter.conf.common"
-#     - "rmilter.conf"
 
 - name: "Configure rspamd/local.d/* files"
   template: src="etc_rspamd_local.d_{{ item }}.j2" dest="/etc/rspamd/local.d/{{ item }}"
@@ -55,13 +48,6 @@
 - name: "Configure Redis"
   template: src="etc_redis_redis.conf.j2" dest="/etc/redis/redis.conf"
 
-
-#- name: Configure rmilter socket
-#  lineinfile: dest=/etc/rmilter.conf regexp=^bind_socket line="bind_socket = inet:9900@localhost;"
-
-#- name: Configure rmilter service
-#  copy: src=lib_systemd_system_rmilter.socket dest=/lib/systemd/system/rmilter.socket
-
 - name: Start clamav-daemon
   service: name=clamav-daemon state=started enabled=yes
 
@@ -79,6 +65,3 @@
 
 - name: Restart rspamd systemd listener
   service: name=rspamd state=restarted enabled=yes
-
-#- name: Start rmilter systemd listener
-#  service: name=rmilter state=started
