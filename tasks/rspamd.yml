@@ -21,7 +21,7 @@
     - unbound        # rspamd dns resolver
   tags:
     - dependencies
-
+    
 - name: "Configure rspamd/local.d/* files"
   template: src="etc_rspamd_local.d_{{ item }}.j2" dest="/etc/rspamd/local.d/{{ item }}"
   with_items:
@@ -34,6 +34,8 @@
     - "milter_headers.conf"
     - "antivirus.conf"
     - "options.inc"
+    - "dmarc.conf"
+  notify: restart rspamd
 
 - name: "Update DNSSEC Root key and reload Unbound service"
   shell: "unbound-anchor -a /var/lib/unbound/root.key"
@@ -62,6 +64,3 @@
 
 - name: Start rspamd systemd listener
   service: name=rspamd state=started enabled=yes
-
-- name: Restart rspamd systemd listener
-  service: name=rspamd state=restarted enabled=yes
